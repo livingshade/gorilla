@@ -71,6 +71,11 @@ TEST_COLLECTION_MAPPING = {
         "simple_java",
         "simple_javascript",
     ],
+    "simple": [
+        "simple_python",
+        "simple_java",
+        "simple_javascript",
+    ],
     "python": [
         "simple_python",
         "irrelevance",
