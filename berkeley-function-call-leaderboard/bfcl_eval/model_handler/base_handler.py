@@ -744,7 +744,8 @@ class BaseHandler:
         metadata["input_token_count"] = model_response_data["input_token"]
         metadata["output_token_count"] = model_response_data["output_token"]
         metadata["latency"] = query_latency
-
+        if "beam_responses" in model_response_data:
+            metadata["beam_responses"] = model_response_data["beam_responses"]
         if (
             "reasoning_content" in model_response_data
             and model_response_data["reasoning_content"] != ""

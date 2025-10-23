@@ -304,10 +304,15 @@ class OSSHandler(BaseHandler, EnforceOverrides):
             extra_body["stop_token_ids"] = self.stop_token_ids
         if hasattr(self, "skip_special_tokens"):
             extra_body["skip_special_tokens"] = self.skip_special_tokens
-
+        
+        extra_body["use_beam_search"] = True
+        extra_body["length_penalty"] = 1.0
         start_time = time.time()
+        
         if len(extra_body) > 0:
             api_response = self.client.completions.create(
+                n=3,
+                best_of=3,
                 model=self.model_path_or_id,
                 temperature=self.temperature,
                 prompt=formatted_prompt,
@@ -340,9 +345,14 @@ class OSSHandler(BaseHandler, EnforceOverrides):
 
     @override
     def _parse_query_response_prompting(self, api_response: Any) -> dict:
+        if len(api_response.choices) > 1:
+            beam_responses = [choice.text for choice in api_response.choices]
+        else:
+            beam_responses = None
         return {
             "model_responses": api_response.choices[0].text,
-            "input_token": api_response.usage.prompt_tokens,
+            "beam_responses": beam_responses,
+            "input_token": api_response.usage.prompt_tokens,            
             "output_token": api_response.usage.completion_tokens,
         }
 

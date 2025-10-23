@@ -248,35 +248,41 @@ class QwenFCHandler(OSSHandler):
 
     @override
     def _parse_query_response_prompting(self, api_response: Any) -> dict:
-        model_response = api_response.choices[0].text
-        extracted_tool_calls = self._extract_tool_calls(model_response)
+        model_responses = []
+        reasoning_contents = []
+        for choice in api_response.choices:
+            model_response = choice.text
+            reasoning_content = ""
+        
+            extracted_tool_calls = self._extract_tool_calls(model_response)
+            # print("Extracted tool calls:", extracted_tool_calls)
+            cleaned_response = model_response
+            if "</think>" in model_response:
+                parts = model_response.split("</think>")
+                reasoning_content = parts[0].rstrip("\n").split("<think>")[-1].lstrip("\n")
+                cleaned_response = parts[-1].lstrip("\n")
+            model_responses.append(extracted_tool_calls)
+            reasoning_contents.append(reasoning_content)
 
-        reasoning_content = ""
-        cleaned_response = model_response
-        if "</think>" in model_response:
-            parts = model_response.split("</think>")
-            reasoning_content = parts[0].rstrip("\n").split("<think>")[-1].lstrip("\n")
-            cleaned_response = parts[-1].lstrip("\n")
-
-        if len(extracted_tool_calls) > 0:
-            model_responses_message_for_chat_history = {
-                "role": "assistant",
-                "content": "",
-                "tool_calls": extracted_tool_calls,
-            }
-
-        else:
-            model_responses_message_for_chat_history = {
-                "role": "assistant",
-                "content": cleaned_response,
-            }
+        #     if len(extracted_tool_calls) > 0:
+        #         model_responses_message_for_chat_history = {
+        #             "role": "assistant",
+        #             "content": "",
+        #             "tool_calls": extracted_tool_calls,
+        #         } 
+        #     else:
+        #         model_responses_message_for_chat_history = {
+        #             "role": "assistant",
+        #             "content": cleaned_response,
+        #         }
             
-        model_responses_message_for_chat_history["reasoning_content"] = reasoning_content
+        # model_responses_message_for_chat_history["reasoning_content"] = reasoning_content
 
         return {
-            "model_responses": cleaned_response,
-            "reasoning_content": reasoning_content,
-            "model_responses_message_for_chat_history": model_responses_message_for_chat_history,
+            "model_responses": model_responses[0],
+            "reasoning_content": reasoning_contents[0],
+            "beam_responses": [(i, j) for i, j in zip(model_responses, reasoning_contents)],
+            "model_responses_message_for_chat_history": None,
             "input_token": api_response.usage.prompt_tokens,
             "output_token": api_response.usage.completion_tokens,
         }

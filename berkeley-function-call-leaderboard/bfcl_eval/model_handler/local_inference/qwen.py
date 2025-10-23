@@ -180,18 +180,23 @@ class QwenHandler(OSSHandler):
 
     @override
     def _parse_query_response_prompting(self, api_response: Any) -> dict:
-        model_response = api_response.choices[0].text
+        model_responses = []
+        reasoning_contents = []
+        for choice in api_response.choices:
+            model_response = choice.text
 
-        reasoning_content = ""
-        cleaned_response = model_response
-        if "</think>" in model_response:
-            parts = model_response.split("</think>")
-            reasoning_content = parts[0].rstrip("\n").split("<think>")[-1].lstrip("\n")
-            cleaned_response = parts[-1].lstrip("\n")
-
+            reasoning_content = ""
+            cleaned_response = model_response
+            if "</think>" in model_response:
+                parts = model_response.split("</think>")
+                reasoning_content = parts[0].rstrip("\n").split("<think>")[-1].lstrip("\n")
+                cleaned_response = parts[-1].lstrip("\n")
+            model_responses.append(cleaned_response)
+            reasoning_contents.append(reasoning_content)
         return {
-            "model_responses": cleaned_response,
-            "reasoning_content": reasoning_content,
+            "model_responses": model_responses[0],
+            "reasoning_content": reasoning_contents[0],
+            "beam_responses": [(i,j) for i,j in zip(model_responses, reasoning_contents)],
             "input_token": api_response.usage.prompt_tokens,
             "output_token": api_response.usage.completion_tokens,
         }
