@@ -312,7 +312,7 @@ class OSSHandler(BaseHandler, EnforceOverrides):
         if len(extra_body) > 0:
             api_response = self.client.completions.create(
                 n=3,
-                best_of=5,
+                best_of=3,
                 model=self.model_path_or_id,
                 temperature=self.temperature,
                 prompt=formatted_prompt,

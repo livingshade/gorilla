@@ -60,6 +60,14 @@ NON_SCORING_CATEGORY = ["format_sensitivity"]
 ALL_SCORING_CATEGORIES = SINGLE_TURN_CATEGORY + MULTI_TURN_CATEGORY + AGENTIC_CATEGORY
 ALL_CATEGORIES = ALL_SCORING_CATEGORIES + NON_SCORING_CATEGORY
 
+SPEC_CATEGORY = [
+    "simple_python",
+    "simple_java",
+    "simple_javascript",
+    "live_simple",
+    "web_search_base",
+]
+
 TEST_COLLECTION_MAPPING = {
     "all": ALL_CATEGORIES,
     "all_scoring": ALL_SCORING_CATEGORIES,
@@ -76,6 +84,7 @@ TEST_COLLECTION_MAPPING = {
         "simple_java",
         "simple_javascript",
     ],
+    "spec": SPEC_CATEGORY,
     "python": [
         "simple_python",
         "irrelevance",
